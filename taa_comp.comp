@@ -80,7 +80,7 @@ void main() {
             }
         }
 
-        const float d = (2 * WINDOW_R + 1) * (2 * WINDOW_R + 1);
+        float d = (2 * WINDOW_R + 1) * (2 * WINDOW_R + 1);
         mean /= d;
         sigma = sqrt(sigma / d - mean * mean);
 

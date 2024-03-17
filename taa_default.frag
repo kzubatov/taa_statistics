@@ -1,6 +1,6 @@
 #version 450
 
-layout(constant_id) const int WINDOW_R = 1;
+layout(constant_id = 0) const int WINDOW_R = 1;
 
 layout(location = 0) out vec4 color;
 
@@ -42,13 +42,13 @@ void main()
     {
         for (int j = -WINDOW_R; j <= WINDOW_R; ++j)
         {
-            vec3 c = rgb2ycbcr(textureLod(currenFrame, texCoord + vec2(j, i) * params.offset, 0).rgb);
+            vec3 c = rgb2ycbcr(textureLod(colorTex, texCoord + vec2(j, i) * params.offset, 0).rgb);
             mean += c;
             sigma += c * c;
         }
     }
 
-    const float d = (2 * WINDOW_R + 1) * (2 * WINDOW_R + 1);
+    float d = (2 * WINDOW_R + 1) * (2 * WINDOW_R + 1);
     mean /= d;
     sigma = sqrt(sigma / d - mean * mean);
 

@@ -1,6 +1,6 @@
 #version 450
 
-layout(constant_id) const int WINDOW_R = 1;
+layout(constant_id = 0) const int WINDOW_R = 1;
 
 layout(location = 0) out vec4 color;
 
@@ -40,8 +40,8 @@ void taa3x3()
     vec3 mean = vec3(0);
     vec3 sigma = vec3(0);
     
-    vec3 texel_0 = rgb2ycbcr(textureLod(currenFrame, texCoord + vec2(-1, 1) * t * params.offset, 0).rgb);
-    vec3 texel_1 = rgb2ycbcr(textureLod(currenFrame, texCoord + vec2( 1, 1) * t * params.offset, 0).rgb);
+    vec3 texel_0 = rgb2ycbcr(textureLod(colorTex, texCoord + vec2(-1, 1) * t * params.offset, 0).rgb);
+    vec3 texel_1 = rgb2ycbcr(textureLod(colorTex, texCoord + vec2( 1, 1) * t * params.offset, 0).rgb);
     mean += texel_0 + texel_1;
     sigma += texel_0 * texel_0 + texel_1 * texel_1;
     texel_1 += dFdxFine(texel_1) * t.x;
@@ -50,15 +50,15 @@ void taa3x3()
     mean += mean + dFdyFine(mean) * t.y;
     sigma += sigma + dFdyFine(sigma) * t.y;
 
-    texel_0 = rgb2ycbcr(textureLod(currenFrame, texCoord + vec2(-1, -1) * t * params.offset, 0).rgb);
-    texel_1 = rgb2ycbcr(textureLod(currenFrame, texCoord + vec2( 1, -1) * t * params.offset, 0).rgb);
+    texel_0 = rgb2ycbcr(textureLod(colorTex, texCoord + vec2(-1, -1) * t * params.offset, 0).rgb);
+    texel_1 = rgb2ycbcr(textureLod(colorTex, texCoord + vec2( 1, -1) * t * params.offset, 0).rgb);
     mean += texel_0 + texel_1;
     sigma += texel_0 * texel_0 + texel_1 * texel_1;
     texel_1 += dFdxFine(texel_1) * t.x;
     mean += texel_1;
     sigma += texel_1 * texel_1;
 
-    const float d = (2 * WINDOW_R + 1) * (2 * WINDOW_R + 1);
+    float d = (2 * WINDOW_R + 1) * (2 * WINDOW_R + 1);
     mean /= d;
     sigma = sqrt(sigma / d - mean * mean);
 
@@ -76,15 +76,15 @@ void taa5x5()
     vec3 sigma = vec3(0);
     
     vec3 texels[9];
-    texels[0] = rgb2ycbcr(textureLod(currenFrame, texCoord + vec2(-2, -2) * t * params.offset, 0).rgb);
-    texels[1] = rgb2ycbcr(textureLod(currenFrame, texCoord + vec2( 0, -2) * t * params.offset, 0).rgb);
-    texels[2] = rgb2ycbcr(textureLod(currenFrame, texCoord + vec2( 2, -2) * t * params.offset, 0).rgb);
-    texels[3] = rgb2ycbcr(textureLod(currenFrame, texCoord + vec2(-2,  0) * t * params.offset, 0).rgb);
-    texels[4] = rgb2ycbcr(textureLod(currenFrame, texCoord, 0).rgb);
-    texels[5] = rgb2ycbcr(textureLod(currenFrame, texCoord + vec2( 2,  0) * t * params.offset, 0).rgb);
-    texels[6] = rgb2ycbcr(textureLod(currenFrame, texCoord + vec2(-2,  2) * t * params.offset, 0).rgb);
-    texels[7] = rgb2ycbcr(textureLod(currenFrame, texCoord + vec2( 0,  2) * t * params.offset, 0).rgb);
-    texels[8] = rgb2ycbcr(textureLod(currenFrame, texCoord + vec2( 2,  2) * t * params.offset, 0).rgb);
+    texels[0] = rgb2ycbcr(textureLod(colorTex, texCoord + vec2(-2, -2) * t * params.offset, 0).rgb);
+    texels[1] = rgb2ycbcr(textureLod(colorTex, texCoord + vec2( 0, -2) * t * params.offset, 0).rgb);
+    texels[2] = rgb2ycbcr(textureLod(colorTex, texCoord + vec2( 2, -2) * t * params.offset, 0).rgb);
+    texels[3] = rgb2ycbcr(textureLod(colorTex, texCoord + vec2(-2,  0) * t * params.offset, 0).rgb);
+    texels[4] = rgb2ycbcr(textureLod(colorTex, texCoord, 0).rgb);
+    texels[5] = rgb2ycbcr(textureLod(colorTex, texCoord + vec2( 2,  0) * t * params.offset, 0).rgb);
+    texels[6] = rgb2ycbcr(textureLod(colorTex, texCoord + vec2(-2,  2) * t * params.offset, 0).rgb);
+    texels[7] = rgb2ycbcr(textureLod(colorTex, texCoord + vec2( 0,  2) * t * params.offset, 0).rgb);
+    texels[8] = rgb2ycbcr(textureLod(colorTex, texCoord + vec2( 2,  2) * t * params.offset, 0).rgb);
 
     for (int i = 3; i <= 8; ++i)
     {
@@ -95,14 +95,14 @@ void taa5x5()
     mean += dFdxFine(mean) * t.x;
     sigma += dFdxFine(sigma) * t.x;
 
-    mean += texels[3] + texels[4] + texels[6] + texels[7];
-    sigma += texels[3] * texels[3] + texels[4] * texels[4] + texels[6] * texels[6] + texels[7] * texels[7];
+    mean += texels[4] + texels[5] + texels[7] + texels[8];
+    sigma += texels[4] * texels[4] + texels[5] * texels[5] + texels[7] * texels[7] + texels[8] * texels[8];
 
     mean += dFdyFine(mean) * t.y;
     sigma += dFdyFine(sigma) * t.y;
 
-    mean += texels[0] + texels[1] + texels[3] + texels[4] + texels[6] + texels[7];
-    sigma +=  texels[0] * texels[0] + texels[1] * texels[1] + texels[3] * texels[3] + texels[4] * texels[4] + texels[6] * texels[6] + texels[7] * texels[7];
+    mean += texels[1] + texels[2] + texels[4] + texels[5] + texels[7] + texels[8];
+    sigma +=  texels[1] * texels[1] + texels[2] * texels[2] + texels[4] * texels[4] + texels[5] * texels[5] + texels[7] * texels[7] + texels[8] * texels[8];
 
     mean += dFdxFine(mean) * t.x;
     sigma += dFdxFine(sigma) * t.x;
@@ -113,7 +113,7 @@ void taa5x5()
         sigma += texels[i] * texels[i]; 
     }
 
-    const float d = (2 * WINDOW_R + 1) * (2 * WINDOW_R + 1);
+    float d = (2 * WINDOW_R + 1) * (2 * WINDOW_R + 1);
     mean /= d;
     sigma = sqrt(sigma / d - mean * mean);
 
@@ -131,22 +131,22 @@ void taa7x7()
     vec3 sigma = vec3(0);
     
     vec3 texels[16];
-    texels[0]  = rgb2ycbcr(textureLod(currenFrame, texCoord + vec2(-3, -3) * t * params.offset, 0).rgb);
-    texels[1]  = rgb2ycbcr(textureLod(currenFrame, texCoord + vec2(-1, -3) * t * params.offset, 0).rgb);
-    texels[2]  = rgb2ycbcr(textureLod(currenFrame, texCoord + vec2( 1, -3) * t * params.offset, 0).rgb);
-    texels[3]  = rgb2ycbcr(textureLod(currenFrame, texCoord + vec2( 3, -3) * t * params.offset, 0).rgb);
-    texels[4]  = rgb2ycbcr(textureLod(currenFrame, texCoord + vec2(-3, -1) * t * params.offset, 0).rgb);
-    texels[5]  = rgb2ycbcr(textureLod(currenFrame, texCoord + vec2(-1, -1) * t * params.offset, 0).rgb);
-    texels[6]  = rgb2ycbcr(textureLod(currenFrame, texCoord + vec2( 1, -1) * t * params.offset, 0).rgb);
-    texels[7]  = rgb2ycbcr(textureLod(currenFrame, texCoord + vec2( 3, -1) * t * params.offset, 0).rgb);
-    texels[8]  = rgb2ycbcr(textureLod(currenFrame, texCoord + vec2(-3,  1) * t * params.offset, 0).rgb); 
-    texels[9]  = rgb2ycbcr(textureLod(currenFrame, texCoord + vec2(-1,  1) * t * params.offset, 0).rgb);
-    texels[10] = rgb2ycbcr(textureLod(currenFrame, texCoord + vec2( 1,  1) * t * params.offset, 0).rgb);
-    texels[11] = rgb2ycbcr(textureLod(currenFrame, texCoord + vec2( 3,  1) * t * params.offset, 0).rgb);
-    texels[12] = rgb2ycbcr(textureLod(currenFrame, texCoord + vec2(-3,  3) * t * params.offset, 0).rgb); 
-    texels[13] = rgb2ycbcr(textureLod(currenFrame, texCoord + vec2(-1,  3) * t * params.offset, 0).rgb);
-    texels[14] = rgb2ycbcr(textureLod(currenFrame, texCoord + vec2( 1,  3) * t * params.offset, 0).rgb);
-    texels[15] = rgb2ycbcr(textureLod(currenFrame, texCoord + vec2( 3,  3) * t * params.offset, 0).rgb);
+    texels[0]  = rgb2ycbcr(textureLod(colorTex, texCoord + vec2(-3, -3) * t * params.offset, 0).rgb);
+    texels[1]  = rgb2ycbcr(textureLod(colorTex, texCoord + vec2(-1, -3) * t * params.offset, 0).rgb);
+    texels[2]  = rgb2ycbcr(textureLod(colorTex, texCoord + vec2( 1, -3) * t * params.offset, 0).rgb);
+    texels[3]  = rgb2ycbcr(textureLod(colorTex, texCoord + vec2( 3, -3) * t * params.offset, 0).rgb);
+    texels[4]  = rgb2ycbcr(textureLod(colorTex, texCoord + vec2(-3, -1) * t * params.offset, 0).rgb);
+    texels[5]  = rgb2ycbcr(textureLod(colorTex, texCoord + vec2(-1, -1) * t * params.offset, 0).rgb);
+    texels[6]  = rgb2ycbcr(textureLod(colorTex, texCoord + vec2( 1, -1) * t * params.offset, 0).rgb);
+    texels[7]  = rgb2ycbcr(textureLod(colorTex, texCoord + vec2( 3, -1) * t * params.offset, 0).rgb);
+    texels[8]  = rgb2ycbcr(textureLod(colorTex, texCoord + vec2(-3,  1) * t * params.offset, 0).rgb); 
+    texels[9]  = rgb2ycbcr(textureLod(colorTex, texCoord + vec2(-1,  1) * t * params.offset, 0).rgb);
+    texels[10] = rgb2ycbcr(textureLod(colorTex, texCoord + vec2( 1,  1) * t * params.offset, 0).rgb);
+    texels[11] = rgb2ycbcr(textureLod(colorTex, texCoord + vec2( 3,  1) * t * params.offset, 0).rgb);
+    texels[12] = rgb2ycbcr(textureLod(colorTex, texCoord + vec2(-3,  3) * t * params.offset, 0).rgb); 
+    texels[13] = rgb2ycbcr(textureLod(colorTex, texCoord + vec2(-1,  3) * t * params.offset, 0).rgb);
+    texels[14] = rgb2ycbcr(textureLod(colorTex, texCoord + vec2( 1,  3) * t * params.offset, 0).rgb);
+    texels[15] = rgb2ycbcr(textureLod(colorTex, texCoord + vec2( 3,  3) * t * params.offset, 0).rgb);
 
     for (int i = 4; i <= 15; ++i)
     {
@@ -157,17 +157,17 @@ void taa7x7()
     mean += dFdxFine(mean) * t.x;
     sigma += dFdxFine(sigma) * t.x;
 
-    mean += texels[4] + texels[5] + texels[6] + texels[8] + texels[9] + texels[10] + texels[12] + texels[13] + texels[14];
-    sigma += texels[4] * texels[4] + texels[5] * texels[5] + texels[6] * texels[6] + texels[8] * texels[8] 
-        + texels[9] * texels[9] + texels[10] * texels[10] + texels[12] * texels[12] + texels[13] * texels[13] + texels[14] * texels[14];
+    mean += texels[5] + texels[6] + texels[7] + texels[9] + texels[10] + texels[11] + texels[13] + texels[14] + texels[15];
+    sigma += texels[5] * texels[5] + texels[6] * texels[6] + texels[7] * texels[7] + texels[9] * texels[9] 
+        + texels[10] * texels[10] + texels[11] * texels[11] + texels[13] * texels[13] + texels[14] * texels[14] + texels[15] * texels[15];
 
     mean += dFdyFine(mean) * t.y;
     sigma += dFdyFine(sigma) * t.y;
 
-    mean += texels[0] + texels[1] + texels[2] + texels[4] + texels[5] + texels[6] 
-        + texels[8] + texels[9] + texels[10] + texels[12] + texels[13] + texels[14];
-    sigma += texels[0] * texels[0] + texels[1] * texels[1] + texels[2] * texels[2] + texels[4] * texels[4] + texels[5] * texels[5] 
-        + texels[6] * texels[6] + texels[8] * texels[8] + texels[9] * texels[9] + texels[10] * texels[10] + texels[12] * texels[12] + texels[13] * texels[13] + texels[14] * texels[14];
+    mean += texels[1] + texels[2] + texels[3] + texels[5] + texels[6] + texels[7] 
+        + texels[9] + texels[10] + texels[11] + texels[13] + texels[14] + texels[15];
+    sigma += texels[1] * texels[1] + texels[2] * texels[2] + texels[3] * texels[3] + texels[5] * texels[5] + texels[6] * texels[6] 
+        + texels[7] * texels[7] + texels[9] * texels[9] + texels[10] * texels[10] + texels[11] * texels[11] + texels[13] * texels[13] + texels[14] * texels[14] + texels[15] * texels[15];
 
     mean += dFdxFine(mean) * t.x;
     sigma += dFdxFine(sigma) * t.x;
@@ -178,7 +178,7 @@ void taa7x7()
         sigma += texels[i] * texels[i]; 
     }
 
-    const float d = (2 * WINDOW_R + 1) * (2 * WINDOW_R + 1);
+    float d = (2 * WINDOW_R + 1) * (2 * WINDOW_R + 1);
     mean /= d;
     sigma = sqrt(sigma / d - mean * mean);
 
@@ -196,26 +196,4 @@ void main()
         taa5x5();
     else if (WINDOW_R == 3)
         taa7x7();
-
-    vec3 mean = vec3(0);
-    vec3 sigma = vec3(0);
-
-    for (int i = -WINDOW_R; i <= WINDOW_R; ++i)
-    {
-        for (int j = -WINDOW_R; j <= WINDOW_R; ++j)
-        {
-            vec3 c = rgb2ycbcr(textureLod(currenFrame, texCoord + vec2(j, i) * params.offset, 0).rgb);
-            mean += c;
-            sigma += c * c;
-        }
-    }
-
-    const float d = (2 * WINDOW_R + 1) * (2 * WINDOW_R + 1);
-    mean /= d;
-    sigma = sqrt(sigma / d - mean * mean);
-
-    vec3 minC = mean - params.gamma * sigma;
-    vec3 maxC = mean + params.gamma * sigma;
-
-    color.rgb = 10.0 * abs(color.rgb - ycbcr2rgb(mix(minC, maxC, params.t)));
 }
